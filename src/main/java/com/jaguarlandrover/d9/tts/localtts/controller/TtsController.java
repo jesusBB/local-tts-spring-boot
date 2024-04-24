@@ -1,18 +1,21 @@
 package com.jaguarlandrover.d9.tts.localtts.controller;
 
-import com.amazonaws.services.polly.model.OutputFormat;
 import com.jaguarlandrover.d9.tts.localtts.model.TtsResponse;
 import com.jaguarlandrover.d9.tts.localtts.services.PollyService;
 import com.jaguarlandrover.d9.tts.localtts.services.S3Service;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.io.InputStream;
+import software.amazon.awssdk.services.polly.model.OutputFormat;
 
 @RestController
+@Slf4j
 @RequestMapping(value = "/api")
 public class TtsController {
 
@@ -27,15 +30,9 @@ public class TtsController {
     }
 
     @GetMapping(path = "/polly/")
-    public ResponseEntity<TtsResponse> getS3LinkForAudio(){
-
-        InputStream audioStream = null;
-       // try {
-            audioStream = pollyService.synthesize("You won't get to Tesco with this level of battery", OutputFormat.Mp3);
-        /*} catch (IOException e) {
-            //TODO create a proper way to handle exceptions
-            e.printStackTrace();
-        }*/
+    public ResponseEntity<TtsResponse> getS3LinkForAudio(@RequestHeader("text") String inputText){
+        log.info("Text to convert: {}", inputText);
+        InputStream audioStream = pollyService.synthesize(inputText, OutputFormat.MP3);
 
         String fileUrl = s3Service.putAudioInS3(audioStream);
 
