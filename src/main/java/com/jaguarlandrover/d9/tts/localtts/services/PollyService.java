@@ -21,7 +21,7 @@ public class PollyService {
     public InputStream synthesize(String text, OutputFormat format) {
         DescribeVoicesRequest describeVoicesRequest =  DescribeVoicesRequest.builder().engine("neural").build();
         polly.describeVoices(describeVoicesRequest).voices().stream().forEach(v -> System.out.println(v.name()));
-        Voice voice = polly.describeVoices(describeVoicesRequest).voices().stream().filter(v -> v.name().equals("Matthew")).findFirst().orElseThrow(() -> new RuntimeException("Voice not found"));
+        Voice voice = polly.describeVoices(describeVoicesRequest).voices().stream().filter(v -> v.name().equals("Adriano")).findFirst().orElseThrow(() -> new RuntimeException("Voice not found"));
         SynthesizeSpeechRequest synthReq =
                 SynthesizeSpeechRequest.builder().text(text).voiceId(voice.id())
                         .outputFormat(format).engine("neural").build();
