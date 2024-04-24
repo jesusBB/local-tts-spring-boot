@@ -1,6 +1,5 @@
 package com.jaguarlandrover.d9.tts.localtts.controller;
 
-import com.amazonaws.services.polly.model.OutputFormat;
 import com.jaguarlandrover.d9.tts.localtts.model.TtsResponse;
 import com.jaguarlandrover.d9.tts.localtts.services.PollyService;
 import com.jaguarlandrover.d9.tts.localtts.services.S3Service;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.io.InputStream;
+import software.amazon.awssdk.services.polly.model.OutputFormat;
 
 @RestController
 @RequestMapping(value = "/api")
@@ -31,7 +31,7 @@ public class TtsController {
 
         InputStream audioStream = null;
        // try {
-            audioStream = pollyService.synthesize("You won't get to Tesco with this level of battery", OutputFormat.Mp3);
+            audioStream = pollyService.synthesize("You won't get to Tesco with this level of battery", OutputFormat.MP3);
         /*} catch (IOException e) {
             //TODO create a proper way to handle exceptions
             e.printStackTrace();

@@ -1,30 +1,34 @@
 package com.jaguarlandrover.d9.tts.localtts.services;
 
 import com.amazonaws.regions.Regions;
-import com.amazonaws.services.polly.AmazonPolly;
-import com.amazonaws.services.polly.AmazonPollyClientBuilder;
-import com.amazonaws.services.polly.model.OutputFormat;
-import com.amazonaws.services.polly.model.SynthesizeSpeechRequest;
-import com.amazonaws.services.polly.model.SynthesizeSpeechResult;
-import com.amazonaws.services.polly.model.VoiceId;
+
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.io.InputStream;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.polly.PollyClient;
+import software.amazon.awssdk.services.polly.model.DescribeVoicesRequest;
+import software.amazon.awssdk.services.polly.model.OutputFormat;
+import software.amazon.awssdk.services.polly.model.SynthesizeSpeechRequest;
+import software.amazon.awssdk.services.polly.model.Voice;
+import software.amazon.awssdk.services.polly.model.VoiceId;
 
 @Service
 public class PollyService {
-
-    private AmazonPolly polly = AmazonPollyClientBuilder.standard().withRegion(Regions.EU_WEST_1).build();
+    private PollyClient polly = PollyClient.builder().region(Region.EU_WEST_1).build();
 
     public InputStream synthesize(String text, OutputFormat format) {
+        DescribeVoicesRequest describeVoicesRequest =  DescribeVoicesRequest.builder().engine("neural").build();
+        polly.describeVoices(describeVoicesRequest).voices().stream().forEach(v -> System.out.println(v.name()));
+        Voice voice = polly.describeVoices(describeVoicesRequest).voices().stream().filter(v -> v.name().equals("Matthew")).findFirst().orElseThrow(() -> new RuntimeException("Voice not found"));
         SynthesizeSpeechRequest synthReq =
-                new SynthesizeSpeechRequest().withText(text).withVoiceId("asdf")
-                        .withOutputFormat(format).withEngine("neural");
-        SynthesizeSpeechResult synthRes;
-        synthRes = polly.synthesizeSpeech(synthReq);
+                SynthesizeSpeechRequest.builder().text(text).voiceId(voice.id())
+                        .outputFormat(format).engine("neural").build();
 
-        return synthRes.getAudioStream();
+        ResponseInputStream synthRes = polly.synthesizeSpeech(synthReq);
+
+        return synthRes;
     }
 
 }
