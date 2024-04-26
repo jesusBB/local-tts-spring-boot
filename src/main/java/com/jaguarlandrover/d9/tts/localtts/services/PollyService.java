@@ -2,6 +2,9 @@ package com.jaguarlandrover.d9.tts.localtts.services;
 
 import com.amazonaws.regions.Regions;
 
+import com.jaguarlandrover.d9.tts.localtts.configuration.PollyConfiguration;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -14,19 +17,28 @@ import software.amazon.awssdk.services.polly.model.SynthesizeSpeechRequest;
 import software.amazon.awssdk.services.polly.model.Voice;
 import software.amazon.awssdk.services.polly.model.VoiceId;
 
+@Slf4j
 @Service
 public class PollyService {
-    private PollyClient polly = PollyClient.builder().region(Region.EU_WEST_1).build();
+    //private PollyClient polly;
+    private PollyConfiguration pollyConfiguration;
+    //private Voice voice;
+
+    @Autowired
+    public PollyService(PollyConfiguration pollyConfiguration){
+//        this.polly = polly;
+        this.pollyConfiguration = pollyConfiguration;
+//        this.voice = voice;
+    }
 
     public InputStream synthesize(String text, OutputFormat format) {
-        DescribeVoicesRequest describeVoicesRequest =  DescribeVoicesRequest.builder().engine("neural").build();
-        polly.describeVoices(describeVoicesRequest).voices().stream().forEach(v -> System.out.println(v.name()));
-        Voice voice = polly.describeVoices(describeVoicesRequest).voices().stream().filter(v -> v.name().equals("Adriano")).findFirst().orElseThrow(() -> new RuntimeException("Voice not found"));
-        SynthesizeSpeechRequest synthReq =
-                SynthesizeSpeechRequest.builder().text(text).voiceId(voice.id())
-                        .outputFormat(format).engine("neural").build();
+       // log.info("Default engine: {} " , pollyConfiguration.getDefaultEngine());
 
-        ResponseInputStream synthRes = polly.synthesizeSpeech(synthReq);
+        SynthesizeSpeechRequest synthReq =
+                SynthesizeSpeechRequest.builder().text(text).voiceId(pollyConfiguration.getVoice().id())
+                        .outputFormat(format).engine(pollyConfiguration.getDefaultEngine()).build();
+
+        ResponseInputStream synthRes = pollyConfiguration.getPollyClient().synthesizeSpeech(synthReq);
 
         return synthRes;
     }
