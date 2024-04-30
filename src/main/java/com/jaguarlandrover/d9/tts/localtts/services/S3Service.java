@@ -1,49 +1,54 @@
 package com.jaguarlandrover.d9.tts.localtts.services;
 
-import com.amazonaws.HttpMethod;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import com.jaguarlandrover.d9.tts.localtts.configuration.S3Configuration;
+import com.jaguarlandrover.d9.tts.localtts.utils.s3.PresignedUrlGenerator;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Calendar;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import software.amazon.awssdk.awscore.presigner.PresignedRequest;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetUrlRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 @Service
+@Slf4j
 public class S3Service {
 
-    private final AmazonS3 s3;
+    private final S3Client s3;
+
+    private S3Configuration s3Configuration;
 
     @Autowired
-    public S3Service(AmazonS3 s3) {
+    public S3Service(S3Client s3, S3Configuration s3Configuration) {
         this.s3 = s3;
+        this.s3Configuration = s3Configuration;
     }
 
     public String putAudioInS3(InputStream speechStream) {
-        String bucketName = "tts-workshop2";
+        String bucketName = s3Configuration.getAudioDefaultBucket();
 
-        // s3.putObject("tts", "example-1", speechStream, new ObjectMetadata());
         final String objectKey = "example-1.mp3";
-        PutObjectRequest objectRequest = new PutObjectRequest(bucketName, objectKey, speechStream, new ObjectMetadata()).withInputStream(speechStream);//.withCannedAcl(CannedAccessControlList.PublicRead);
 
-        s3.putObject(objectRequest);
+        PutObjectRequest objectRequest = PutObjectRequest.builder().bucket(bucketName).key(objectKey).build();
+        try {
+            s3.putObject(objectRequest, RequestBody.fromBytes(speechStream.readAllBytes()));
+        } catch (IOException e) {
+            log.error("Error uploading audio file to S3: {}", e.getMessage() );
+            throw new RuntimeException(e);
+        }
 
-        final Calendar instance = Calendar.getInstance();
-
-        instance.add(Calendar.MINUTE, 1);
-
-
-        GeneratePresignedUrlRequest urlRequest = new GeneratePresignedUrlRequest(bucketName, objectKey)
-                .withMethod(HttpMethod.GET).withExpiration(instance.getTime());
-
-        URL presignedUrl = s3.generatePresignedUrl(urlRequest);
-
-        String urlString = s3.getUrl("tts-workshop2", objectKey).toString();
-        return presignedUrl.toString();
-
+        return PresignedUrlGenerator.generatePresignedUrl(bucketName, objectKey);
     }
+
 
 }
