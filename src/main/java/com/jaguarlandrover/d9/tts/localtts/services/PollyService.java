@@ -1,21 +1,13 @@
 package com.jaguarlandrover.d9.tts.localtts.services;
 
-import com.amazonaws.regions.Regions;
-
 import com.jaguarlandrover.d9.tts.localtts.configuration.PollyConfiguration;
+import java.io.InputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.io.InputStream;
 import software.amazon.awssdk.core.ResponseInputStream;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.polly.PollyClient;
-import software.amazon.awssdk.services.polly.model.DescribeVoicesRequest;
 import software.amazon.awssdk.services.polly.model.OutputFormat;
 import software.amazon.awssdk.services.polly.model.SynthesizeSpeechRequest;
-import software.amazon.awssdk.services.polly.model.Voice;
-import software.amazon.awssdk.services.polly.model.VoiceId;
 
 @Slf4j
 @Service
