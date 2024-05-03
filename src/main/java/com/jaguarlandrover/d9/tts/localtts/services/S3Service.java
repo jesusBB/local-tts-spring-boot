@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.time.Duration;
 import java.util.Calendar;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,15 +23,16 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 
 @Service
 @Slf4j
+@Getter
 public class S3Service {
 
-    private final S3Client s3;
+    //private final S3Client s3;
 
     private S3Configuration s3Configuration;
 
     @Autowired
-    public S3Service(S3Client s3, S3Configuration s3Configuration) {
-        this.s3 = s3;
+    public S3Service(/*S3Client s3,*/ S3Configuration s3Configuration) {
+        //this.s3 = s3;
         this.s3Configuration = s3Configuration;
     }
 
@@ -40,8 +42,9 @@ public class S3Service {
         final String objectKey = "example-1.mp3";
 
         PutObjectRequest objectRequest = PutObjectRequest.builder().bucket(bucketName).key(objectKey).build();
+
         try {
-            s3.putObject(objectRequest, RequestBody.fromBytes(speechStream.readAllBytes()));
+            s3Configuration.s3Client().putObject(objectRequest, RequestBody.fromBytes(speechStream.readAllBytes()));
         } catch (IOException e) {
             log.error("Error uploading audio file to S3: {}", e.getMessage() );
             throw new RuntimeException(e);
