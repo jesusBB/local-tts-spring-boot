@@ -1,13 +1,17 @@
 package com.jaguarlandrover.d9.tts.localtts.controller
 
+import com.jaguarlandrover.d9.tts.localtts.configuration.S3Configuration
+import com.jaguarlandrover.d9.tts.localtts.configuration.S3ConfigurationTest
 import com.jaguarlandrover.d9.tts.localtts.services.PollyService
 import com.jaguarlandrover.d9.tts.localtts.services.S3Service
 import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
+import org.springframework.test.context.TestContext
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils
@@ -23,16 +27,11 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 @Testcontainers
 @SpringBootTest
 @ActiveProfiles("test")
+@ContextConfiguration(classes = [S3ConfigurationTest.class])
 class ControllerSpecIt extends Specification{
 
     @Autowired
     S3Service s3Service
-
-
-    PollyService pollyService = Mock(PollyService)
-
-    @Autowired
-    TtsController ttsController;
 
     @Container
     static LocalStackContainer localStack = new LocalStackContainer(
@@ -42,7 +41,7 @@ class ControllerSpecIt extends Specification{
     static final String BUCKET_NAME = UUID.randomUUID().toString();
     static final String QUEUE_NAME = UUID.randomUUID().toString();
 
-    @DynamicPropertySource
+  /*  @DynamicPropertySource
     static void overrideProperties(DynamicPropertyRegistry registry) {
         registry.add("app.bucket", () -> BUCKET_NAME);
 //        registry.add("app.queue", () -> QUEUE_NAME);
@@ -62,38 +61,24 @@ class ControllerSpecIt extends Specification{
                 "spring.cloud.aws.s3.endpoint",
                 () -> "http://localhost:4566"
         );
-       /* registry.add(
+       *//* registry.add(
                 "spring.cloud.aws.sqs.endpoint",
                 () -> localStack.getEndpointOverride(SQS).toString()
-        );*/
-    }
-
-   /* @BeforeAll
-    static void beforeAll() throws IOException, InterruptedException {
-        localStack.execInContainer("awslocal", "s3", "mb", "s3://" + BUCKET_NAME);
-       *//* localStack.execInContainer(
-                "awslocal",
-                "sqs",
-                "create-queue",
-                "--queue-name",
-                QUEUE_NAME
         );*//*
-    }*/
+    }
+*/
 
     def setupSpec() {
         localStack.start()
-
-//        localStack.execInContainer("awslocal", "s3", "mb", "s3://" + BUCKET_NAME)
+//      localStack.execInContainer("awslocal", "s3", "mb", "s3://" + BUCKET_NAME)
         localStack.execInContainer("awslocal", "s3", "mb", "s3://" + "micarpetita")
         System.out.println("AAAAAAAAAAA: " + localStack.execInContainer("awslocal", "s3", "ls").getStdout())
         System.out.println("S3 URL : " + localStack.getEndpointOverride(S3).toString())
-        /* localStack.execInContainer(
-                 "awslocal",
-                 "sqs",
-                 "create-queue",
-                 "--queue-name",
-                 QUEUE_NAME
-         );*/
+
+    }
+
+    def cleanupSpec(){
+        localStack.stop()
     }
 
     def "test s3 uploading input stream"(){
