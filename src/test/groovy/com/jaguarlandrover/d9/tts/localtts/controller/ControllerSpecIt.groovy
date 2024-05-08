@@ -39,9 +39,9 @@ class ControllerSpecIt extends Specification{
     );
 
     static final String BUCKET_NAME = UUID.randomUUID().toString();
-    static final String QUEUE_NAME = UUID.randomUUID().toString();
 
-  /*  @DynamicPropertySource
+
+    @DynamicPropertySource
     static void overrideProperties(DynamicPropertyRegistry registry) {
         registry.add("app.bucket", () -> BUCKET_NAME);
 //        registry.add("app.queue", () -> QUEUE_NAME);
@@ -58,20 +58,20 @@ class ControllerSpecIt extends Specification{
                 () -> localStack.getSecretKey()
         );
         registry.add(
-                "spring.cloud.aws.s3.endpoint",
-                () -> "http://localhost:4566"
+                "s3.endpoint",
+                () -> localStack.getEndpointOverride(S3).toString()
         );
-       *//* registry.add(
+       /* registry.add(
                 "spring.cloud.aws.sqs.endpoint",
                 () -> localStack.getEndpointOverride(SQS).toString()
-        );*//*
+        );*/
     }
-*/
+
 
     def setupSpec() {
         localStack.start()
 //      localStack.execInContainer("awslocal", "s3", "mb", "s3://" + BUCKET_NAME)
-        localStack.execInContainer("awslocal", "s3", "mb", "s3://" + "micarpetita")
+        localStack.execInContainer("awslocal", "s3", "mb", "s3://" + "testbucket")
         System.out.println("AAAAAAAAAAA: " + localStack.execInContainer("awslocal", "s3", "ls").getStdout())
         System.out.println("S3 URL : " + localStack.getEndpointOverride(S3).toString())
 
