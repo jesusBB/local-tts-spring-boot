@@ -7,11 +7,14 @@ import java.io.InputStream;
 import java.net.URL;
 import java.time.Duration;
 import java.util.Calendar;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.awscore.presigner.PresignedRequest;
 import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetUrlRequest;
@@ -22,6 +25,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 
 @Service
 @Slf4j
+@Getter
 public class S3Service {
 
     private final S3Client s3;
@@ -34,12 +38,15 @@ public class S3Service {
         this.s3Configuration = s3Configuration;
     }
 
+
+
     public String putAudioInS3(InputStream speechStream) {
         String bucketName = s3Configuration.getAudioDefaultBucket();
 
         final String objectKey = "example-1.mp3";
 
         PutObjectRequest objectRequest = PutObjectRequest.builder().bucket(bucketName).key(objectKey).build();
+
         try {
             s3.putObject(objectRequest, RequestBody.fromBytes(speechStream.readAllBytes()));
         } catch (IOException e) {

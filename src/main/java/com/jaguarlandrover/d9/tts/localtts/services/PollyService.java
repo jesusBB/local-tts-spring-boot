@@ -4,6 +4,7 @@ import com.jaguarlandrover.d9.tts.localtts.configuration.PollyConfiguration;
 import java.io.InputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.polly.model.OutputFormat;
@@ -12,15 +13,11 @@ import software.amazon.awssdk.services.polly.model.SynthesizeSpeechRequest;
 @Slf4j
 @Service
 public class PollyService {
-    //private PollyClient polly;
     private PollyConfiguration pollyConfiguration;
-    //private Voice voice;
 
     @Autowired
     public PollyService(PollyConfiguration pollyConfiguration){
-//        this.polly = polly;
         this.pollyConfiguration = pollyConfiguration;
-//        this.voice = voice;
     }
 
     public InputStream synthesize(String text, OutputFormat format) {
