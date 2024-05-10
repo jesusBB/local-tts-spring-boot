@@ -1,6 +1,7 @@
 package com.jaguarlandrover.d9.tts.localtts.configuration;
 
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,9 +20,13 @@ public class PollyConfiguration {
     @Value("${polly.engine.default}")
     private String defaultEngine;
 
+    @Autowired
+    private AWSCredentialsConfiguration awsCredentialsConfiguration;
+
     @Bean
-    public PollyClient getPollyClient(){
-        return PollyClient.builder().region(Region.of(defaultRegion)).build();
+    public PollyClient getPollyClient()
+    {
+        return PollyClient.builder().region(Region.of(defaultRegion)).credentialsProvider(awsCredentialsConfiguration.awsCredentialsProvider()).build();
     }
 
     @Bean
