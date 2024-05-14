@@ -1,50 +1,59 @@
 package com.jaguarlandrover.d9.tts.localtts.controller
 
-import com.jaguarlandrover.d9.tts.localtts.configuration.S3Configuration
 import com.jaguarlandrover.d9.tts.localtts.configuration.S3ConfigurationTest
 import com.jaguarlandrover.d9.tts.localtts.services.PollyService
 import com.jaguarlandrover.d9.tts.localtts.services.S3Service
-import org.junit.jupiter.api.BeforeAll
+import lombok.extern.slf4j.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
-import org.springframework.test.context.TestContext
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils
-import org.testcontainers.shaded.org.bouncycastle.util.encoders.UTF8
 import org.testcontainers.spock.Testcontainers
 import org.testcontainers.utility.DockerImageName
-import spock.lang.Specification
+import software.amazon.awssdk.services.polly.model.OutputFormat
 
 import java.nio.charset.StandardCharsets
 
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get as mockMvcGet
+import spock.lang.Specification
 
-@Testcontainers
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3
+
+@AutoConfigureMockMvc
 @SpringBootTest
 @ActiveProfiles("test")
 @ContextConfiguration(classes = [S3ConfigurationTest.class])
-class ControllerSpecIt extends Specification{
+@Testcontainers
+class TtsControllerSpecIT extends Specification{
+
+    @Autowired
+    MockMvc mockMvc
 
     @Autowired
     S3Service s3Service
 
+    TtsController ttsController
+
+    PollyService pollyService = Mock(PollyService.class)
+
+
+
     @Container
     static LocalStackContainer localStack = new LocalStackContainer(
-            DockerImageName.parse("localstack/localstack:3.0")
-    );
-
-    static final String BUCKET_NAME = UUID.randomUUID().toString();
-
+            DockerImageName.parse("localstack/localstack:3.0"))
 
     @DynamicPropertySource
     static void overrideProperties(DynamicPropertyRegistry registry) {
-        registry.add("app.bucket", () -> BUCKET_NAME);
-//        registry.add("app.queue", () -> QUEUE_NAME);
         registry.add(
                 "spring.cloud.aws.region.static",
                 () -> localStack.getRegion()
@@ -61,37 +70,35 @@ class ControllerSpecIt extends Specification{
                 "s3.endpoint",
                 () -> localStack.getEndpointOverride(S3).toString()
         );
-       /* registry.add(
-                "spring.cloud.aws.sqs.endpoint",
-                () -> localStack.getEndpointOverride(SQS).toString()
-        );*/
     }
-
 
     def setupSpec() {
         localStack.start()
-//      localStack.execInContainer("awslocal", "s3", "mb", "s3://" + BUCKET_NAME)
         localStack.execInContainer("awslocal", "s3", "mb", "s3://" + "testbucket")
-        System.out.println("AAAAAAAAAAA: " + localStack.execInContainer("awslocal", "s3", "ls").getStdout())
-        System.out.println("S3 URL : " + localStack.getEndpointOverride(S3).toString())
-
     }
 
-    def cleanupSpec(){
+    //@TestContainers will automatically stop the containers started by this IT
+    /*def cleanupSpec(){
         localStack.stop()
-    }
+    }*/
 
-    def "test s3 uploading input stream"(){
-        given: "an inputstream"
+
+    def "when some text is sent in the request a fileUrl is sent to the response"(){
+        given: "pollyService returns an input stream"
         String testData = "this is a beautiful test"
-        InputStream inputStream = IOUtils.toInputStream(testData, StandardCharsets.UTF_8)
-        System.out.println("starting test")
+        def inputStream = IOUtils.toInputStream(testData, StandardCharsets.UTF_8)
+        pollyService.toString(testData, OutputFormat.MP3) >> inputStream
 
-        when: "calling S3Service"
-        String url = s3Service.putAudioInS3(inputStream)
+        when: "a request is made"
+        def response = mockMvc.perform(mockMvcGet("/api/polly/").header("text", "this is a test"))
 
-        then: "Url has a value"
-        System.out.println("URL: " + url)
-        url !=  null
+        then: "a fileUrl is expected"
+        System.out.println("response: " + response.andReturn().response.contentAsString)
+        response.andExpect(status().isOk())
+
+
     }
+
+
+
 }
