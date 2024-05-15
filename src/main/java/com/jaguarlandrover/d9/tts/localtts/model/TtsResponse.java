@@ -7,6 +7,6 @@ import lombok.Data;
 @Builder
 public class TtsResponse {
 
-    private String fileUrl;
+  private String fileUrl;
 
 }

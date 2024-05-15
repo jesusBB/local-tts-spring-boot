@@ -9,15 +9,18 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 
 @Slf4j
 public class PresignedUrlGenerator {
-  public static String generatePresignedUrl(String bucketName, String objectKey){
+  public static String generatePresignedUrl(String bucketName, String objectKey) {
     S3Presigner presigner = S3Presigner.create();
     GetObjectRequest
-        getObjectRequest = GetObjectRequest.builder().bucket(bucketName).key(objectKey).build();
+        getObjectRequest = GetObjectRequest.builder().bucket(bucketName).key(
+        objectKey).build();
 
     GetObjectPresignRequest
-        getObjectPresignRequest = GetObjectPresignRequest.builder().signatureDuration(Duration.ofMinutes(5)).getObjectRequest(getObjectRequest).build();
+        getObjectPresignRequest = GetObjectPresignRequest.builder().signatureDuration(
+        Duration.ofMinutes(5)).getObjectRequest(getObjectRequest).build();
 
-    PresignedRequest presignedRequest = presigner.presignGetObject(getObjectPresignRequest);
+    PresignedRequest presignedRequest = presigner.presignGetObject(
+        getObjectPresignRequest);
 
     log.info("Presigned URL: " + presignedRequest.url().toString());
 

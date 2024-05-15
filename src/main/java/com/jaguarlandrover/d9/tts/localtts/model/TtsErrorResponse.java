@@ -7,6 +7,6 @@ import lombok.Data;
 @Builder
 public class TtsErrorResponse {
 
-    private String message;
+  private String message;
 
 }

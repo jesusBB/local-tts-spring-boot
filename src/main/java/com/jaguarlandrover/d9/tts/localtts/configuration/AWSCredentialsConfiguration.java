@@ -7,26 +7,23 @@ import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.polly.PollyClient;
-import software.amazon.awssdk.services.polly.model.DescribeVoicesRequest;
-import software.amazon.awssdk.services.polly.model.Voice;
 
 @Configuration
 @Getter
 public class AWSCredentialsConfiguration {
 
-    @Value("${AWS_ACCESS_KEY_ID}")
-    private String accessKeyId;
+  @Value("${AWS_ACCESS_KEY_ID}")
+  private String accessKeyId;
 
-    @Value("${AWS_SECRET_ACCESS_KEY}")
-    private String secretAccessKey;
+  @Value("${AWS_SECRET_ACCESS_KEY}")
+  private String secretAccessKey;
 
-    @Bean
-    public AwsCredentialsProvider awsCredentialsProvider() {
-        System.out.println("CREDENTIALS: " + accessKeyId);
+  @Bean
+  public AwsCredentialsProvider awsCredentialsProvider() {
+    System.out.println("CREDENTIALS: " + accessKeyId);
 
-        AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
-        return StaticCredentialsProvider.create(awsCredentials);
-    }
+    AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(accessKeyId,
+        secretAccessKey);
+    return StaticCredentialsProvider.create(awsCredentials);
+  }
 }

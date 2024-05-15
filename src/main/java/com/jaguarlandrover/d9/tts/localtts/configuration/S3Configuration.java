@@ -14,18 +14,19 @@ import software.amazon.awssdk.services.s3.S3Client;
 @Setter
 public class S3Configuration {
 
-    @Value("${s3.audio.bucket.default}")
-    private String audioDefaultBucket;
+  @Value("${s3.audio.bucket.default}")
+  private String audioDefaultBucket;
 
-    @Value("${region.default}")
-    private String defaultRegion;
+  @Value("${region.default}")
+  private String defaultRegion;
 
-    @Autowired
-    private AWSCredentialsConfiguration awsCredentialsConfiguration;
+  @Autowired
+  private AWSCredentialsConfiguration awsCredentialsConfiguration;
 
-    @Bean
-    public S3Client s3Client(){
+  @Bean
+  public S3Client s3Client() {
 //        return AmazonS3ClientBuilder.standard().withRegion(Regions.fromName(defaultRegion)).build();
-        return S3Client.builder().region(Region.of(defaultRegion)).credentialsProvider(awsCredentialsConfiguration.awsCredentialsProvider()).build();
-    }
+    return S3Client.builder().region(Region.of(defaultRegion)).credentialsProvider(
+        awsCredentialsConfiguration.awsCredentialsProvider()).build();
+  }
 }

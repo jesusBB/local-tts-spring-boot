@@ -14,27 +14,31 @@ import software.amazon.awssdk.services.polly.model.Voice;
 @Getter
 public class PollyConfiguration {
 
-    @Value("${polly.region.default}")
-    private String defaultRegion;
+  @Value("${polly.region.default}")
+  private String defaultRegion;
 
-    @Value("${polly.engine.default}")
-    private String defaultEngine;
+  @Value("${polly.engine.default}")
+  private String defaultEngine;
 
-    @Autowired
-    private AWSCredentialsConfiguration awsCredentialsConfiguration;
+  @Autowired
+  private AWSCredentialsConfiguration awsCredentialsConfiguration;
 
-    @Bean
-    public PollyClient getPollyClient()
-    {
-        return PollyClient.builder().region(Region.of(defaultRegion)).credentialsProvider(awsCredentialsConfiguration.awsCredentialsProvider()).build();
-    }
+  @Bean
+  public PollyClient getPollyClient() {
+    return PollyClient.builder().region(Region.of(defaultRegion)).credentialsProvider(
+        awsCredentialsConfiguration.awsCredentialsProvider()).build();
+  }
 
-    @Bean
-    public Voice getVoice(){
-        DescribeVoicesRequest describeVoicesRequest =  DescribeVoicesRequest.builder().engine(defaultEngine).build();
+  @Bean
+  public Voice getVoice() {
+    DescribeVoicesRequest describeVoicesRequest = DescribeVoicesRequest.builder().engine(
+        defaultEngine).build();
 //        getPollyClient().describeVoices(describeVoicesRequest).voices().stream().forEach(v -> log.info(v.name()));
-        return getPollyClient().describeVoices(describeVoicesRequest).voices().stream().filter(v -> v.name().equals("Amy")).findFirst().orElseThrow(() -> new RuntimeException("Voice not found"));
+    return getPollyClient().describeVoices(
+        describeVoicesRequest).voices().stream().filter(
+        v -> v.name().equals("Amy")).findFirst().orElseThrow(
+        () -> new RuntimeException("Voice not found"));
 
-    }
+  }
 
 }

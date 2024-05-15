@@ -1,34 +1,30 @@
 package com.jaguarlandrover.d9.tts.localtts.service
 
-import com.jaguarlandrover.d9.tts.localtts.configuration.S3Configuration
+
 import com.jaguarlandrover.d9.tts.localtts.configuration.S3ConfigurationTest
-import com.jaguarlandrover.d9.tts.localtts.services.PollyService
 import com.jaguarlandrover.d9.tts.localtts.services.S3Service
-import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
-import org.springframework.test.context.TestContext
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils
-import org.testcontainers.shaded.org.bouncycastle.util.encoders.UTF8
 import org.testcontainers.spock.Testcontainers
 import org.testcontainers.utility.DockerImageName
 import spock.lang.Specification
 
 import java.nio.charset.StandardCharsets
 
-import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
+import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3
 
 @Testcontainers
 @SpringBootTest
 @ActiveProfiles("test")
 @ContextConfiguration(classes = [S3ConfigurationTest.class])
-class S3ServiceSpecIt extends Specification{
+class S3ServiceSpecIt extends Specification {
 
     @Autowired
     S3Service s3Service
@@ -61,10 +57,10 @@ class S3ServiceSpecIt extends Specification{
                 "s3.endpoint",
                 () -> localStack.getEndpointOverride(S3).toString()
         );
-       /* registry.add(
-                "spring.cloud.aws.sqs.endpoint",
-                () -> localStack.getEndpointOverride(SQS).toString()
-        );*/
+        /* registry.add(
+                 "spring.cloud.aws.sqs.endpoint",
+                 () -> localStack.getEndpointOverride(SQS).toString()
+         );*/
     }
 
 
@@ -77,11 +73,11 @@ class S3ServiceSpecIt extends Specification{
 
     }
 
-    def cleanupSpec(){
+    def cleanupSpec() {
         localStack.stop()
     }
 
-    def "test s3 uploading input stream"(){
+    def "test s3 uploading input stream"() {
         given: "an inputstream"
         String testData = "this is a beautiful test"
         InputStream inputStream = IOUtils.toInputStream(testData, StandardCharsets.UTF_8)
@@ -92,6 +88,6 @@ class S3ServiceSpecIt extends Specification{
 
         then: "Url has a value"
         System.out.println("URL: " + url)
-        url !=  null
+        url != null
     }
 }
